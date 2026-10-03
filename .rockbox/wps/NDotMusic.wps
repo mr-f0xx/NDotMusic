@@ -1,0 +1,212 @@
+# =============================================================================
+#  NDot Music -- Now Playing (WPS)
+#  Hidizs AP80 Pro Max . 360x640 portrait
+#
+#  A Rockbox port of the "Now Playing" screen of the Android player in
+#  uploads/1695807112-958496-image.png (1120x2560), NDot dot-matrix type,
+#  pure black surface, red accent.  Geometry below is that screenshot
+#  converted to the 360x640 panel (artwork = 70% of the width, i.e. 250px).
+#
+#    header          y=12..44    back arrow (left) + album name (centred) +
+#                                a tiny dot-matrix equaliser (right)
+#    album art       x=55..305   y=76..326    250x250, 8px rounded corners
+#    vinyl           y=328..424  a real record: 216px wide, rim + label ring
+#                                + one highlight streak, white (nd-disc.bmp)
+#    title           y=444..468  NDot-24, white, centred, scrolls
+#    artist          y=472..488  NDot-16, red (text-primary), centred
+#    seek bar        y=508..542  waveform, red up to the playhead
+#    times           y=548..564  NDot-16, white: elapsed | file type chip | total
+#    controls        y=575..623  23px-tall dotted icons in 48x48 hit boxes,
+#                                centred (y=599) in the band under the times
+#
+#  The record is drawn to the app's own proportions (measured on a crop of the
+#  reference: radius 0.424 of the artwork's width, centre 12px above the art's
+#  bottom edge, label 0.26 of the radius), so its tip lands at y424 and the
+#  metadata block starts 20px under it.
+#
+#  NOTE: %%%%xl() coordinates are relative to the viewport the image is *shown*
+#        in (Rockbox draws bmp_part() through the current viewport), so every
+#        image is declared at the offset it has inside its own button/viewport.
+# =============================================================================
+
+# --- fonts (NDot 77 JP Extended, SIL OFL 1.1) -------------------------------
+%Fl(2,NDot-24.fnt)
+%Fl(3,NDot-16.fnt)
+%Fl(4,NDot-14.fnt)
+%Fl(5,NDot-12.fnt)
+%Fl(6,NDot-28.fnt)
+%Fl(7,NDot-19.fnt)
+
+# The Now Playing screen is immersive: no status bar, so the header carries
+# the waveform at the right end of the header row.
+%wd
+
+# The screen is pure black -- fill it ourselves so a backdrop configured in
+# Settings > Theme Settings can't bleed through the bitmaps and viewports.
+%V(0,0,360,640,-)
+%dr(0,0,360,640,000000)
+
+# --- header -----------------------------------------------------------------
+%xl(B,nd-ic-back.bmp,25,15)        # 14x26 triangle; the touch area is the whole 64x72 top-left corner
+# --- artwork (square, vinyl disc offset down behind it) ---------------------
+%xl(D,nd-disc.bmp,0,0)             # 216x96 rim viewport -> 0,0
+%xl(P,nd-art-none.bmp,2,2)
+# --- seek bar: a waveform.  Two identical bitmaps, grey + red ---------------
+%xl(WT,nd-wf-track.bmp,0,0)
+%xl(WF,nd-wf-fill.bmp,0,0)
+# --- artwork frame corners ---
+%xl(Q,nd-corner-tl.bmp,0,0)
+%xl(R,nd-corner-tr.bmp,244,0)
+%xl(S,nd-corner-bl.bmp,0,244)
+%xl(T,nd-corner-br.bmp,244,244)
+# --- the tiny dot-matrix equaliser in the header (tools/make_eq.py): the idle picture (a dim
+# baseline) and seven columns, each a strip of level pictures.
+%xl(EQB,nd-eq-base.bmp,0,0)         # 26x26, opaque
+%xl(EQ0,nd-eq-0.bmp,0,0,12)   # 2x26, 12 steps, %pL
+%xl(EQ1,nd-eq-1.bmp,4,0,12)   # 2x26, 12 steps, %pR
+%xl(EQ2,nd-eq-2.bmp,8,0,12)   # 2x26, 12 steps, %pL
+%xl(EQ3,nd-eq-3.bmp,12,0,12)   # 2x26, 12 steps, %pR
+%xl(EQ4,nd-eq-4.bmp,16,0,12)   # 2x26, 12 steps, %pL
+%xl(EQ5,nd-eq-5.bmp,20,0,12)   # 2x26, 12 steps, %pR
+%xl(EQ6,nd-eq-6.bmp,24,0,12)   # 2x26, 12 steps, %pL
+# --- playback controls (23px icons, 20px mode toggles, 48x48 hit boxes) ---
+%xl(E,nd-ic-shuffle.bmp,11,14)
+%xl(G,nd-ic-shuffle-on.bmp,11,14)
+%xl(H,nd-ic-prev.bmp,11,12)
+%xl(I,nd-ic-next.bmp,11,12)
+%xl(J,nd-ic-play.bmp,28,12)
+%xl(L,nd-ic-pause.bmp,28,12)
+%xl(M,nd-ic-repeat.bmp,11,14)
+%xl(N,nd-ic-repeat-on.bmp,11,14)
+%xl(O,nd-ic-repeat-one.bmp,11,14)
+
+# =============================================================================
+#  header: back arrow + album name (the app puts the album name on top)
+# =============================================================================
+# back button: the arrow is unchanged (x25..38, y15..40) but the touch area is the whole top-left
+# corner, 64x72 (x0..64, y0..72), so it is easy to hit with a case on
+%V(0,0,64,72,-)
+%xd(B)
+%T(0,0,64,72,browse)
+# centred on 180, clear of the back arrow and the waveform
+%V(64,18,232,19,7)
+%Vf(FFFFFF)
+%ac%s%?id<%id|%?iA<%iA|%?fc<%fc|>>>
+# the equaliser, 26x26 at x309..334, y15..40 (as tall as the back arrow) -- its right edge is the same 25px from the
+# screen edge as the back arrow's ink is from the left one, on the same centre line.
+# Stopped or paused (%mp 1, 3) the base image is drawn: the dim baseline.  While playing each
+# column is an image (baseline and lit dots all in the picture) whose subimage is picked by
+# the output level, %pL / %pR (peak meter, left / right).  The line carries the levels in
+# black on black so the viewport repaints with them.
+%V(309,15,26,26,5)
+%Vb(000000)%Vf(000000)
+%pL%pR%?mp<%xd(EQB)|%xd(EQ0,%pL)%xd(EQ1,%pR)%xd(EQ2,%pL)%xd(EQ3,%pR)%xd(EQ4,%pL)%xd(EQ5,%pR)%xd(EQ6,%pL)|%xd(EQB)|%xd(EQ0,%pL)%xd(EQ1,%pR)%xd(EQ2,%pL)%xd(EQ3,%pR)%xd(EQ4,%pL)%xd(EQ5,%pR)%xd(EQ6,%pL)|%xd(EQ0,%pL)%xd(EQ1,%pR)%xd(EQ2,%pL)%xd(EQ3,%pR)%xd(EQ4,%pL)%xd(EQ5,%pR)%xd(EQ6,%pL)>
+
+
+# =============================================================================
+#  artwork: a 250x250 square, with the vinyl peeking out below it
+# =============================================================================
+%Vd(a)
+%Vd(d)
+# The art viewport reaches 2px past the artwork on every side so the four corner bitmaps
+# are shown from inside it: images are drawn at the very end of their viewport, after the
+# artwork, which is the only way they can sit on the art without wiping it (a viewport of
+# their own clears its rectangle, art included, and left black squares in the corners).
+%Vl(a,53,74,254,254,-)
+%?C<|%xd(P)>
+%xd(Q)%xd(R)%xd(S)%xd(T)
+%Cl(2,2,250,250,c,c)
+%Cd
+%T(2,2,250,250,trackinfo)
+# The disc below: its own viewport, starting exactly where the artwork ends.
+# Overlapping viewports repaint over each other in Rockbox, so the two must
+# never share a pixel -- hence a slice that stops at the tip of the arc: 216x96,
+# x72..288 -- the width of the record where it leaves the sleeve.
+%Vl(d,72,327,216,96,-)
+%xd(D)
+
+# 1px white frame around the artwork, rounded (r=9 outside, r=8 inside, the
+# artwork's own corner radius).  %dr only fills, so the frame is four straight
+# filled strips plus four corner bitmaps -- and each gets its own tiny
+# viewport: a viewport covering the whole screen would blank everything drawn
+# before it.
+#
+# NOTE: images are composited after *every* viewport has been drawn, so no
+# amount of reordering can keep an opaque bitmap from covering a %dr strip.
+# The disc viewport therefore starts 1px lower than the art's bottom edge -- the
+# frame's bottom edge keeps the 1px lane it needs and the record still begins
+# flush under it.  It keeps
+# the bitmap's full 46px, otherwise the tip of the arc is sliced off.
+# the four straight runs, each stopping 10px short of the corners
+%V(63,75,234,1,-)
+%dr(0,0,234,1,FFFFFF)
+%V(63,326,234,1,-)
+%dr(0,0,234,1,FFFFFF)
+%V(54,84,1,234,-)
+%dr(0,0,1,234,FFFFFF)
+%V(305,84,1,234,-)
+%dr(0,0,1,234,FFFFFF)
+# (the four corner bitmaps are shown inside the art viewport, see above)
+
+# =============================================================================
+#  track metadata: title (white) over artist (red accent), both centred, with
+#  the file-type chip sits in the time row further down
+# =============================================================================
+%V(16,440,328,28,6)
+%Vf(FFFFFF)
+%ac%s%?it<%it|%fn>
+# artist -- rendered as `text-xs text-primary`: red accent
+%V(16,472,328,19,7)
+%Vf(D71923)
+%ac%s%?ia<%ia|%?iA<%iA|>>
+
+# =============================================================================
+#  seek bar, then one row under it: elapsed (left) | file type (middle) | total (right)
+#
+#  The file-type chip lives in the middle of the time row, where no title or artist
+#  line can ever reach it (a long title used to run under it).  It fills itself (%Vb)
+#  rather than being a bitmap: %xd images are drawn at the *end* of the viewport that
+#  shows them, so a box bitmap would always land on top of the text it should sit behind.
+#
+#  %Vb takes no alpha, so the 60% red is pre-blended: #D71923 at 60% over #000000 is
+#  #810F15.  Two viewports, one inside the other: the outer one is the box, the inner one
+#  holds the text and starts 2px lower, which centres the glyphs in the 16px box.  Both
+#  carry the same %Vb: the inner one repaints its own rectangle on every full refresh and
+#  would otherwise punch a black hole through the box.
+#
+#  The times are NDot-16 (they were NDot-12): x16..116 and x244..344 leave the middle
+#  x116..244 to the chip (x161..199).
+# =============================================================================
+%V(16,508,328,34,-)
+%pb(0,0,328,34,image,WF,backdrop,WT)
+%V(16,548,100,16,3)
+%Vf(FFFFFF)
+%pc
+%V(244,548,100,16,3)
+%Vf(FFFFFF)
+%ar%pt
+%V(161,548,38,16,-)
+%Vb(810F15)
+%V(161,550,38,12,4)
+%Vb(810F15)
+%Vf(FFFFFF)
+%ac%s%fc
+
+# =============================================================================
+#  playback controls: shuffle / prev / play / next / repeat
+# =============================================================================
+%V(16,575,48,48,-)
+%?ps<%xd(G)|%xd(E)>
+%T(0,0,48,48,shuffle)
+%V(78,575,48,48,-)
+%xd(H)
+%T(0,0,48,48,wps_prev)
+%V(140,575,80,48,-)
+%?mp<%xd(J)|%xd(L)|%xd(J)|%xd(J)|%xd(J)>
+%T(0,0,80,48,play)
+%V(234,575,48,48,-)
+%xd(I)
+%T(0,0,48,48,wps_next)
+%V(296,575,48,48,-)
+%?mm<%xd(M)|%xd(N)|%xd(O)|%xd(N)>
+%T(0,0,48,48,repmode)

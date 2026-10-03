@@ -1,0 +1,309 @@
+# =============================================================================
+#  NDot Music -- base skin (SBS): the status bar, the menu lists, the footer
+#  Hidizs AP80 Pro Max . 360x640 portrait
+#
+#    bar  (88px)   "NOTHING" in the real Ndot 55, centred in the left of the
+#                  bar and only while the main menu is up -- the battery at the
+#                  right end, a white dotted line underneath.
+#    list (480px)  five rows of 96px, exactly: y88..568.  Each row is a 38px
+#                  dotted icon picked from the item's own icon number (%LI) and
+#                  its name in NDot-24.  No highlight bar: the row you are on is
+#                  the one written in the accent red.
+#    footer (72px) the now-playing mini player, only while something is loaded:
+#                  rounded thumbnail, title (white) over artist (red), then
+#                  prev / a red play pill / next.   y568..640
+#
+#  Font ids match the WPS: 2 = NDot-24 (list rows), 3 = NDot-16, 4 = NDot-14,
+#  5 = NDot-12, 6 = NDot-28 (row bands), 7 = NDot-19, 9 = NDot-57XL (the USB charge figure).
+#
+#  Painting a row: the list code never clears a row viewport, and the only thing
+#  that paints a viewport's background colour is its own text line.  So a row is
+#  built out of bands -- four NDot-28 viewports, 28+28+28+12 = the 96px row --
+#  that repaint it black before the icon and the name go on top.
+# =============================================================================
+%we
+%Fl(6,NDot-28.fnt)          # the row bands
+%Fl(2,NDot-24.fnt)          # a list row
+%Fl(3,NDot-16.fnt)          # the footer artist, the UI
+%Fl(4,NDot-14.fnt)          # the battery percentage
+%Fl(5,NDot-12.fnt)          # (WPS: the times)
+%Fl(7,NDot-19.fnt)          # the USB rows' values
+%Fl(9,NDot-57XL.fnt)        # the same face on a 4px pitch (27px caps): the charge figure on the USB screen
+# images have to be loaded here, in the default viewport of a .sbs
+%xl(B,nd-bat.bmp,0,0,30)   # 37x16, 30 subimages: shell + red dots (9x3), picked by %bl
+%xl(D,nd-ring.bmp,0,0)     # 36x36 loader ring (16 white dots, one red) before the title
+%xl(C,nd-bat-chg.bmp,0,0,30) # the same with a white bolt in the fill box, while charging
+%xl(H,nd-title.bmp,0,0)    # "NOTHING", 119x21
+%xl(J,nd-usb-title.bmp,0,0) # "USB CONNECTED", 184x18
+%xl(K,nd-dotline.bmp,0,0)  # the dotted line under the bar AND above the footer, 360x3 (white dots, 3px on a 6px pitch)
+%xl(I,nd-usb-ring.bmp,0,0) # USB screen: ring + bolt, 98x98
+%xl(F,nd-usb-bar.bmp,0,0)  # USB screen: dotted bar, red
+%xl(G,nd-usb-bar-track.bmp,0,0) # ... and its grey track
+%xl(M,nd-icons.bmp,0,0,33) # 38x38, one tile per themable icon number (+ a clock, tile 33, for Time & Date)
+%xl(P,nd-fp-prev.bmp,10,13)
+%xl(N,nd-fp-next.bmp,10,13)
+%xl(L,nd-fp-play.bmp,0,0)
+%xl(Z,nd-fp-pause.bmp,0,0)
+%xl(A,nd-fp-none.bmp,0,0)
+%xl(Q,nd-fp-ctl.bmp,0,0)
+%xl(R,nd-fp-ctr.bmp,38,0)
+%xl(S,nd-fp-cbl.bmp,0,38)
+%xl(T,nd-fp-cbr.bmp,38,38)
+%xl(U,nd-id3-rules.bmp,0,0)  # TRACK INFO card: dotted rules
+%xl(O,nd-ic-back.bmp,22,31) # the back triangle (14x26) of the menu header, in the 64x88 back viewport
+
+# --- the footer, switched on while a track is loaded (%mp: 0 = stopped) --------
+# %Vd lives here, in the default viewport, ahead of the viewports it enables: a
+# %Vd written after them would be part of the last one's content, which is
+# itself hidden.
+%?mp<|%Vd(fl)%Vd(fa)%Vd(ft)%Vd(fr)%Vd(fv)%Vd(fy)%Vd(fn)|%Vd(fl)%Vd(fa)%Vd(ft)%Vd(fr)%Vd(fv)%Vd(fy)%Vd(fn)|%Vd(fl)%Vd(fa)%Vd(ft)%Vd(fr)%Vd(fv)%Vd(fy)%Vd(fn)|%Vd(fl)%Vd(fa)%Vd(ft)%Vd(fr)%Vd(fv)%Vd(fy)%Vd(fn)>
+
+# --- the back button (viewport bk): every menu but the main menu (cs 1) and the USB screen (cs 21)
+%?cs<||%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)|%Vd(bk)||%Vd(bk)>
+
+# --- the battery icon and its percentage: everywhere but the USB screen (cs 21), which keeps a bare bar with the time
+%?cs<%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)|%Vd(bt)%Vd(bq)||%Vd(bt)%Vd(bq)>
+
+# --- the USB screen: switched on while the activity is USB (%cs = 21) -----------
+# ACTIVITY_USBSCREEN is 21 (apps/misc.h).  22 branches: 1..20 do nothing, 21
+# shows the card, and the last one is for anything out of range.
+%?cs<|||||||||||||||||||%Vd(kz)%Vd(kb)%Vd(kt)%Vd(ka)%Vd(kd)%Vd(kf)%Vd(kc)%Vd(kl)%Vd(kr1)%Vd(kr2)%Vd(kr3)%Vd(kr4)%Vd(kr5)%Vd(kr6)%Vd(kv1)%Vd(kv2)%Vd(kv3)%Vd(kv4)%Vd(kv5)%Vd(kv6)|%Vd(ub)%Vd(ui)%Vd(ut)%Vd(us)%Vd(up)%Vd(ug)%Vd(ul)%Vd(uv1)%Vd(uv2)%Vd(uv3)%Vd(ua)%Vd(ub1)%Vd(ub2)%Vd(uh)|>
+
+# --- the bar: the title, and only on the main menu ------------------------
+# The title is a bitmap of the real Ndot 55 caps (tools/make_title.py): round dots that touch
+# each other, 3px across on a 3px pitch and 4.5px between rows -- 21px caps, 119px wide
+# (a font can only be 1px dots, or 2px dots on a 3px pitch).  Left aligned at x66, 14px after
+# the ring, on the bar's centre line (y34..54).  Branch 1 of %cs is the main menu.
+# the loader ring: the same 16px from the left edge as the battery is from the right,
+# on the bar's centre line (y26..61), and only on the main menu like the title.
+# The image is cleared when the screen changes.
+%V(16,26,36,36,-)
+%?cs<%xd(D)||||||||>
+%V(66,34,119,21,-)
+%?cs<%xd(H)||||||||>
+# --- on the USB screen (branch 21) the same place shows the time, %cH:%cM, in the same font.
+# --- every other menu: the list's own title (%Lt: "Settings", "Playback", ...) in NDot-24, in
+# the place the logo has on the main menu.  Branch 1 = the main menu and branch 21 = the USB
+# screen stay empty; the last branch (any other value) shows the title too.  Having %Lt in the
+# skin also stops Rockbox from drawing the title itself, which left the bar empty.
+%V(56,32,206,24,2)
+%Vb(000000)%Vf(FFFFFF)
+%?cs<||%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%Lt|%?cS<Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info|Track Info>||%Lt>
+%V(0,32,360,24,2)
+%Vb(000000)%Vf(FFFFFF)
+%ac%?cs<||||||||||||||||||||%cH:%cM|>
+
+# --- battery: a 1px outline with the real charge inside ----------------------
+# nd-bat.bmp is a strip of 30 pictures of the same shell: no red at all, then 1
+# px more of red in each, up to a full 28 px.  %xd(B,%bl) lets Rockbox pick the
+# picture from the battery level (it hands %bl the number of pictures and gets
+# back  28 * level / 100 + 1).  Bitmaps composite after the viewports, so the
+# figure sits beside the icon instead of inside it.  A viewport's line must be
+# dynamic to be repainted when the level changes: %bl, drawn black on black.
+%Vl(bt,307,36,37,16,4)
+%Vb(000000)%Vf(000000)
+%bl%?bp<%xd(C,%bl)|%xd(B,%bl)>
+# the percentage with its % sign, right aligned against the icon (NDot-14; %% is a
+# literal percent sign).  The viewport is wide enough for "100%" and clear of the title
+# (which ends at x254).
+%Vl(bq,262,38,38,13,4)
+%Vb(000000)%Vf(FFFFFF)
+%ar%bl%%
+# a dotted line in white closes the bar off from the list (y85..87) -- not on the USB screen
+# (%cs = 21: the 21st branch is empty)
+%V(0,85,360,3,-)
+%?cs<%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)|%xd(K)||%xd(K)>
+
+# =============================================================================
+#  the lists.  %Lb sizes one row, %Vi puts the list between the bar and the
+#  footer, and each %Vl(entry,...) viewport is stamped once per row, top to
+#  bottom, in the order they appear here.
+# =============================================================================
+%Lb(entry,360,96)
+%Vi(-,0,88,360,480,3)%Vb(000000)%Vf(000000)
+
+# the row, repainted black: four bands as tall as the 96px row
+%Vl(entry,0,0,360,28,6)
+%Vb(000000)
+%Vl(entry,0,28,360,28,6)
+%Vb(000000)
+%Vl(entry,0,56,360,28,6)
+%Vb(000000)
+%Vl(entry,0,84,360,12,6)
+%Vb(000000)
+
+# the art.  The conditional line in front of the %LI is not decoration: without
+# a line that carries a conditional, the icon of the row you are on is never
+# drawn.  %LI is the item's own themable icon number (apps/gui/icon.h), so the
+# art follows the item -- Files gets a folder, Settings a gear -- rather than
+# its position in the list.  Branch n of a conditional is the value n, so branch
+# 1 is Icon_Folder; 0 (Icon_Audio) and -1 (no icon) fall through to the last
+# branch, which is the notes.
+%Vl(entry,22,29,38,38,3)
+%?Lc<%Vb(000000)|%Vb(000000)>%?LI<%?if(%LT,=,Recent Bookmarks: Off)<%xd(Mj)|%?if(%LT,=,Files: Off)<%xd(MC)|%?if(%LT,=,Database: Off)<%xd(MF)|%?if(%LT,=,Resume Playback: Off)<%xd(My)|%?if(%LT,=,Now Playing: Off)<%xd(My)|%?if(%LT,=,Settings: Off)<%xd(Mt)|%?if(%LT,=,Recording: Off)<%xd(Mu)|%?if(%LT,=,FM Radio: Off)<%xd(MB)|%?if(%LT,=,Playlists: Off)<%xd(Mb)|%?if(%LT,=,Plugins: Off)<%xd(Mi)|%?if(%LT,=,System: Off)<%xd(Mx)|%?if(%LT,=,Shortcuts: Off)<%xd(Mj)|%?if(%LT,=,Signets récents: Non)<%xd(Mj)|%?if(%LT,=,Dossiers et fichiers: Non)<%xd(MC)|%?if(%LT,=,Base de données tags: Non)<%xd(MF)|%?if(%LT,=,Reprendre la lecture: Non)<%xd(My)|%?if(%LT,=,En lecture: Non)<%xd(My)|%?if(%LT,=,Réglages: Non)<%xd(Mt)|%?if(%LT,=,Enregistrement: Non)<%xd(Mu)|%?if(%LT,=,Radio FM: Non)<%xd(MB)|%?if(%LT,=,Listes de lecture: Non)<%xd(Mb)|%?if(%LT,=,Modules d'extension: Non)<%xd(Mi)|%?if(%LT,=,Système: Non)<%xd(Mx)|%?if(%LT,=,Raccourcis: Non)<%xd(Mj)|%xd(Ma)>>>>>>>>>>>>>>>>>>>>>>>>|%xd(Mb)|%xd(Mc)|%xd(Md)|%xd(Me)|%xd(Mf)|%xd(Mg)|%?if(%LT,=,Recent Bookmarks: On)<%xd(Mj)|%?if(%LT,=,Files: On)<%xd(MC)|%?if(%LT,=,Database: On)<%xd(MF)|%?if(%LT,=,Resume Playback: On)<%xd(My)|%?if(%LT,=,Now Playing: On)<%xd(My)|%?if(%LT,=,Settings: On)<%xd(Mt)|%?if(%LT,=,Recording: On)<%xd(Mu)|%?if(%LT,=,FM Radio: On)<%xd(MB)|%?if(%LT,=,Playlists: On)<%xd(Mb)|%?if(%LT,=,Plugins: On)<%xd(Mi)|%?if(%LT,=,System: On)<%xd(Mx)|%?if(%LT,=,Shortcuts: On)<%xd(Mj)|%?if(%LT,=,Signets récents: Oui)<%xd(Mj)|%?if(%LT,=,Dossiers et fichiers: Oui)<%xd(MC)|%?if(%LT,=,Base de données tags: Oui)<%xd(MF)|%?if(%LT,=,Reprendre la lecture: Oui)<%xd(My)|%?if(%LT,=,En lecture: Oui)<%xd(My)|%?if(%LT,=,Réglages: Oui)<%xd(Mt)|%?if(%LT,=,Enregistrement: Oui)<%xd(Mu)|%?if(%LT,=,Radio FM: Oui)<%xd(MB)|%?if(%LT,=,Listes de lecture: Oui)<%xd(Mb)|%?if(%LT,=,Modules d'extension: Oui)<%xd(Mi)|%?if(%LT,=,Système: Oui)<%xd(Mx)|%?if(%LT,=,Raccourcis: Oui)<%xd(Mj)|%xd(Mh)>>>>>>>>>>>>>>>>>>>>>>>>|%xd(Mi)|%xd(Mj)|%xd(Mk)|%xd(Ml)|%xd(Mm)|%xd(Mn)|%xd(Mo)|%xd(Mp)|%?if(%LT,=,Time & Date)<%xd(MG)|%?if(%LT,=,Date & heure)<%xd(MG)|%xd(Mq)>>|%xd(Mr)|%xd(Ms)|%xd(Mt)|%xd(Mu)|%xd(Mv)|%xd(Mw)|%xd(Mx)|%xd(My)|%xd(Mz)|%xd(MA)|%xd(MB)|%xd(MC)|%xd(MD)|%xd(ME)|%?if(%LT,=,Recent Bookmarks: Off)<%xd(Mj)|%?if(%LT,=,Files: Off)<%xd(MC)|%?if(%LT,=,Database: Off)<%xd(MF)|%?if(%LT,=,Resume Playback: Off)<%xd(My)|%?if(%LT,=,Now Playing: Off)<%xd(My)|%?if(%LT,=,Settings: Off)<%xd(Mt)|%?if(%LT,=,Recording: Off)<%xd(Mu)|%?if(%LT,=,FM Radio: Off)<%xd(MB)|%?if(%LT,=,Playlists: Off)<%xd(Mb)|%?if(%LT,=,Plugins: Off)<%xd(Mi)|%?if(%LT,=,System: Off)<%xd(Mx)|%?if(%LT,=,Shortcuts: Off)<%xd(Mj)|%?if(%LT,=,Signets récents: Non)<%xd(Mj)|%?if(%LT,=,Dossiers et fichiers: Non)<%xd(MC)|%?if(%LT,=,Base de données tags: Non)<%xd(MF)|%?if(%LT,=,Reprendre la lecture: Non)<%xd(My)|%?if(%LT,=,En lecture: Non)<%xd(My)|%?if(%LT,=,Réglages: Non)<%xd(Mt)|%?if(%LT,=,Enregistrement: Non)<%xd(Mu)|%?if(%LT,=,Radio FM: Non)<%xd(MB)|%?if(%LT,=,Listes de lecture: Non)<%xd(Mb)|%?if(%LT,=,Modules d'extension: Non)<%xd(Mi)|%?if(%LT,=,Système: Non)<%xd(Mx)|%?if(%LT,=,Raccourcis: Non)<%xd(Mj)|%xd(MF)>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# the name, in NDot-24: the accent red on the row you are on, white on the rest.
+# It has to be the only text viewport in the row: a second one writes an empty
+# line over this one, and the name of the row you are on is then clipped to its
+# first three pixel rows on every new screen.
+# The colour is the text *style* (%Vs colour): a %Vf in a row viewport blanks the
+# row's text altogether.
+%Vl(entry,78,38,266,24,2)%Vb(000000)
+%?Lc<%Vs(colour,D71923)|%Vs(colour,FFFFFF)>%s%LT
+
+# the back button: the triangle of the Now Playing header, left of the title; touching the header's
+# left part goes one level up (the touch action `cancel`, same as the Back key)
+%Vl(bk,0,0,64,88,-)
+%xd(O)
+%T(0,0,64,88,cancel)
+
+# =============================================================================
+#  the now-playing footer.  Every piece is a labelled viewport, drawn by the
+#  %Vd at the bottom -- and only while a track is loaded (%mp: 0 = stopped).
+# =============================================================================
+%Vl(fl,0,568,360,3,-)
+%xd(K)
+
+# the thumbnail: 44x44, corners rounded by four 6x6 colour-key masks (#FF00FF = see-through)
+# drawn from inside this same viewport, so the art stays under them.  Touching it (or the title / artist
+# beside it) jumps straight to the Now Playing screen: the touch action `resumeplayback`
+# (ACTION_TREE_WPS, the same thing as the "Resume Playback" row).
+%Vl(fa,18,582,44,44,-)
+%?C<|%xd(A)>
+%xd(Q)%xd(R)%xd(S)%xd(T)
+%Cl(0,0,44,44,c,c)
+%Cd
+%T(0,0,44,44,resumeplayback)
+# title over artist, left aligned, scrolling when they do not fit
+%Vl(ft,74,585,140,19,7)%Vb(000000)%Vf(FFFFFF)
+%s%?it<%it|%fn>
+%T(0,0,140,19,resumeplayback)
+%Vl(fr,74,607,140,16,3)%Vb(000000)%Vf(D71923)
+%s%?ia<%ia|%?iA<%iA|>>
+%T(0,0,140,16,resumeplayback)
+
+# prev / the pill / next -- 20px glyphs in 40px touch boxes
+%Vl(fv,215,584,40,40,-)
+%xd(P)
+%T(0,0,40,40,wps_prev)
+%Vl(fy,254,589,56,30,-)
+%?mp<|%xd(Z)|%xd(L)|%xd(L)|%xd(L)>
+%T(0,0,56,30,play)
+%Vl(fn,308,584,40,40,-)
+%xd(N)
+%T(0,0,40,40,wps_next)
+
+# =============================================================================
+#  the USB / charging screen (y88..568), shown while %cs = 21 (ACTIVITY_USBSCREEN).
+#
+#  No wallpaper, no dotted line under the bar here: plain black.  The ring and bar bitmaps
+#  are transparent between their dots.
+#
+#  Rockbox draws this skin once when USB connects, then clears the list area and
+#  puts its own 176x47 logo at the right of the middle.  From then on only dynamic
+#  lines are repainted, so:
+#   * the logo is painted out by a 2-line viewport (NDot-28 lines are 28px, two
+#     of them cover the logo's 47px (the viewport is 56px: two full lines)) whose lines are %bl, black on black;
+#   * the figure, the bar, the voltage is dynamic, the date is a tick by nature;
+#   * every static text is a conditional on the seconds, %?cS<T|T|...|T> (60
+#     branches, generated by tools/gen_usb_card.py): its value changes every
+#     second, so the text is drawn again a second after the wipe.
+#  Everything is centred on x=180 and spread over the whole screen, from the bar (y88) down to
+#  y628: ring y104, title y259, figure y300, state y352, bar y392, three 52px rows from y436,
+#  hint y612.  Rockbox's logo sits at x184..360, y296..347 and the wipe (ub) clears that box
+#  again on every refresh -- so nothing that is NOT repainted on every refresh may overlap it:
+#  the state line (repainted only when its %cS tick changes) used to sit there and got a black
+#  square blinking through the word CHARGING.  The figure is dynamic and may.  Sizes: the ring 131px (dots 3px on a 4px pitch), the
+#  title 258x25, the state NDot-24, the figure NDot-57XL (27px caps), the bar 295x11, the
+#  rows NDot-16 / NDot-19.
+# =============================================================================
+%Vl(ub,184,296,176,56,6)%Vb(000000)%Vf(000000)
+%bl
+%bl
+
+# the ring: dotted, red, with the bolt in white dots
+%Vl(ui,115,104,131,131,-)
+%xd(I)
+
+# title: a bitmap of the real Ndot 55 (tools/make_title.py), then the state in red
+%Vl(ut,51,259,258,25,-)
+%xd(J)
+%Vl(us,0,352,360,24,2)%Vb(000000)%Vf(D71923)
+%ac%?cS<%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>|%?bc<CHARGING|%?bp<CHARGED|ON USB POWER>>>
+
+# the charge: the big 4px-pitch figure and the dotted bar under it
+%Vl(up,0,300,360,39,9)%Vb(000000)%Vf(FFFFFF)
+%ac%bl%%
+%Vl(ug,32,392,295,11,-)
+%bl(0,0,295,11,image,F,backdrop,G)
+
+# three rows: a grey label on the left, the value in white on the right, both sitting on the
+# same baseline.  The rules are drawn 24px down their viewport: a %dr on its first line gets
+# wiped by the line's own repaint.
+%Vl(ul,32,412,296,132,-)
+%?cS<%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)|%dr(0,24,296,1,444444)%dr(0,76,296,1,444444)%dr(0,128,296,1,444444)>
+%Vl(uv1,32,456,110,16,3)%Vb(000000)%Vf(A0A0A0)
+%?cS<MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE|MODE>
+%Vl(uv2,32,508,110,16,3)%Vb(000000)%Vf(A0A0A0)
+%?cS<VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE|VOLTAGE>
+%Vl(uv3,32,560,110,16,3)%Vb(000000)%Vf(A0A0A0)
+%?cS<DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE|DATE>
+%Vl(ua,142,453,186,19,7)%Vb(000000)%Vf(FFFFFF)
+%ar%?cS<MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE|MASS STORAGE>
+%Vl(ub1,142,505,186,19,7)%Vb(000000)%Vf(FFFFFF)
+%ar%bv V
+%Vl(ub2,142,557,186,19,7)%Vb(000000)%Vf(FFFFFF)
+%ar%?cS<%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY|%cd.%cm.%cY>
+
+# a hint, dim
+%Vl(uh,0,612,360,16,3)%Vb(000000)%Vf(8A8A8A)
+%ac%?cS<EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG|EJECT BEFORE YOU UNPLUG>
+
+# ===ID3-CARD===
+# =============================================================================
+#  the TRACK INFO card (y88..568), shown while %cs = 20 (ACTIVITY_ID3SCREEN, the screen a tap on
+#  the Now Playing album art opens).  The stock list is hidden (black on black, %Vi above); the
+#  header shows the list title ("Track Info") like any other menu.  Touch: the title bar = back
+#  (`cancel`), the body swallows touches (`none`) so a tap cannot open the text viewer on a row
+#  of the hidden list.  Generated by tools/gen_id3_card.py.
+# =============================================================================
+%Vl(kz,0,88,360,480,-)
+%T(0,0,360,480,none)
+%Vl(kb,0,0,254,88,-)
+%T(0,0,254,88,cancel)
+%Vl(kt,16,112,328,28,6)%Vb(000000)%Vf(FFFFFF)
+%ac%s%?cS<%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>|%?it<%it|%fn>>
+%Vl(ka,16,146,328,19,7)%Vb(000000)%Vf(D71923)
+%ac%s%?cS<%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>|%?ia<%ia|%?iA<%iA|>>>
+%Vl(kd,16,172,328,16,3)%Vb(000000)%Vf(A0A0A0)
+%ac%s%?cS<%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id|%id>
+%Vl(kf,0,212,360,39,9)%Vb(000000)%Vf(D71923)
+%ac%?cS<%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt|%pt>
+%Vl(kc,0,258,360,16,3)%Vb(000000)%Vf(FFFFFF)
+%ac%?cS<LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH|LENGTH>
+%Vl(kl,24,299,312,229,-)
+%?cS<%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)|%xd(U)>
+%Vl(kr1,24,311,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE|GENRE>
+%Vl(kv1,140,311,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->|%?ig<%ig|->>
+%Vl(kr2,24,349,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR|YEAR>
+%Vl(kv2,140,349,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->|%?iy<%iy|->>
+%Vl(kr3,24,387,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK|TRACK>
+%Vl(kv3,140,387,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->|%?in<%in|->>
+%Vl(kr4,24,425,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT|FORMAT>
+%Vl(kv4,140,425,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>|%fc%?fv< VBR|>>
+%Vl(kr5,24,463,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE|BITRATE>
+%Vl(kv5,140,463,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps|%fb kbps>
+%Vl(kr6,24,501,112,16,3)%Vb(000000)%Vf(FFFFFF)
+%?cS<SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE|SAMPLE RATE>
+%Vl(kv6,140,501,196,16,3)%Vb(000000)%Vf(D71923)
+%ar%s%?cS<%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz|%fk kHz>
